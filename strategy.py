@@ -32,12 +32,16 @@ def gen_position(df: pd.DataFrame) -> pd.DataFrame:
     
     # 6. Tính Relative Strength
     # Tạm thời bỏ qua cảnh báo chia cho 0 để hệ thống không bị crash khi avg_loss = 0
-    with np.errstate(divide='ignore', invalid='ignore'):
+    with np.errstate(divide="ignore", invalid="ignore"):
         rs = avg_gain / avg_loss
     
     # 7. Tính toán chỉ số RSI hoàn chỉnh
     # Xử lý ngoại lệ: Nếu không có phiên giảm nào (avg_loss = 0), RSI mặc định là mức tối đa 100
-    rsi = np.where(avg_loss == 0, 100, 100 - (100 / (1 + rs)))
+    rsi = np.where(
+        (avg_loss == 0) & (avg_gain == 0),
+        50,
+        np.where(avg_loss == 0, 100, 100 - (100 / (1 + rs)))
+    )
     df['RSI'] = rsi
     
 # 8. Xây dựng logic tạo tín hiệu (vị thế) giao dịch
